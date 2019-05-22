@@ -63,6 +63,7 @@ class _ProductFormState extends State<ProductForm> {
             child: Text('Submit'),
             onPressed: () {
               if (_formKey.currentState.validate()) {
+                _formKey.currentState.save();
                 Navigator.pop(context, _product);
               }
             },

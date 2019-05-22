@@ -1,7 +1,17 @@
 import 'package:diet_app/products/product_model.dart';
 import 'package:flutter/material.dart';
 
-class ProductListPage extends StatelessWidget {
+class ProductListPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return _ProductListPageState();
+  }
+}
+
+class _ProductListPageState extends State<ProductListPage>{
+
+  List<Product> products = new List();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -9,50 +19,35 @@ class ProductListPage extends StatelessWidget {
         title: Text("App"),
       ),
       body: Center(
-        child: ProductsList(),
+        child: ProductsList(products: products),
       ),
       floatingActionButton:
-          FloatingActionButton(
-              onPressed: () async {
-                final result = await Navigator.pushNamed(context, '/product');
+      FloatingActionButton(
+          onPressed: () async {
+            final result = await Navigator.pushNamed(context, '/product');
 
-                if(result != null && result is Product){
-                  Scaffold.of(context)
-                    ..removeCurrentSnackBar()
-                    ..showSnackBar(SnackBar(content: Text("$result")));
-                }
-              },
-              child: Icon(Icons.add)),
+            if(result != null && result is Product){
+              setState(() {
+                products.add(result);
+              });
+            }
+          },
+          child: Icon(Icons.add)),
     );
   }
+  
 }
 
-class ProductsList extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return _ProductsListState();
-  }
-}
+class ProductsList extends StatelessWidget {
 
-class _ProductsListState extends State<ProductsList> {
-  List<Product> products = new List();
+  final List<Product> products;
 
-  @override
-  void initState() {
-    super.initState();
-    for (int q = 0; q < 1000; q++) {
-      products.add(Product.basic("Product", 10.0 + q));
-    }
-    /*products.add(Product("Beef", 120.0));
-    products.add(Product("Egg", 50));
-    products.add(Product("Carot", 120));*/
-  }
+  const ProductsList({Key key, this.products}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return ListView.builder(
-        //padding: EdgeInsets.all(16.0),
+      //padding: EdgeInsets.all(16.0),
         itemCount: products.length,
         itemBuilder: (BuildContext ctx, int index) {
           return new Padding(
@@ -67,4 +62,5 @@ class _ProductsListState extends State<ProductsList> {
           );
         });
   }
+
 }
