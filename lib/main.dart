@@ -1,5 +1,5 @@
-import 'package:diet_app/products/product_editor.dart';
-import 'package:diet_app/products/products_list.dart';
+import 'package:diet_app/pages/products/product_editor.dart';
+import 'package:diet_app/pages/products/products_list.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());

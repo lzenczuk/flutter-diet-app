@@ -1,4 +1,4 @@
-import 'package:diet_app/products/product_model.dart';
+import 'package:diet_app/models/product.dart';
 import 'package:flutter/material.dart';
 
 class ProductEditorPage extends StatelessWidget {
