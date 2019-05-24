@@ -17,6 +17,11 @@ class _ProductEditorState extends State<ProductEditorPage> {
 
   Product _product;
 
+  FocusNode nameFocusNode;
+  FocusNode fatFocusNode;
+  FocusNode carbohydrateFocusNode;
+  FocusNode proteinFocusNode;
+
   _ProductEditorState(Product product) {
     if (product != null) {
       _product = product;
@@ -26,11 +31,25 @@ class _ProductEditorState extends State<ProductEditorPage> {
   }
 
   @override
+  void initState() {
+    nameFocusNode = FocusNode();
+    fatFocusNode = FocusNode();
+    carbohydrateFocusNode = FocusNode();
+    proteinFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    nameFocusNode.dispose();
+    fatFocusNode.dispose();
+    carbohydrateFocusNode.dispose();
+    proteinFocusNode.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var nameFocusNode = FocusNode();
-    var fatFocusNode = FocusNode();
-    var carbohydrateFocusNode = FocusNode();
-    var proteinFocusNode = FocusNode();
 
     return Scaffold(
         appBar: AppBar(
@@ -62,7 +81,9 @@ class _ProductEditorState extends State<ProductEditorPage> {
                       return 'Please enter product name';
                     }
                   },
-                  onSaved: (value) => setState(() => _product.name = value),
+                  onSaved: (value){
+                    setState(() => _product.name = value);
+                  },
                   textInputAction: TextInputAction.next,
                   focusNode: nameFocusNode,
                   onFieldSubmitted: (term) {
@@ -100,9 +121,6 @@ class _ProductEditorState extends State<ProductEditorPage> {
                   onSaved: (value) => setState(() => _product.protein = value),
                   textInputAction: TextInputAction.done,
                   focusNode: proteinFocusNode,
-                  onFieldSubmitted: (term) {
-                    validateAndSave(context);
-                  },
                 )
               ],
             ),
@@ -139,7 +157,7 @@ class NumberFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      decoration: InputDecoration(labelText: fieldName),
+      decoration: InputDecoration(labelText: fieldName, hintText: '0'),
       keyboardType: TextInputType.number,
       textInputAction: this.textInputAction,
       focusNode: this.focusNode,
@@ -154,7 +172,7 @@ class NumberFormField extends StatelessWidget {
         }
 
         if (num < 0) {
-          return 'Only numbers bigger then 0 allowed';
+          return 'Numbers smaller then 0 not allowed';
         }
       },
       onSaved: (value) {
