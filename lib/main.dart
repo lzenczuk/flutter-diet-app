@@ -1,4 +1,5 @@
 import 'package:diet_app/pages/products/product_editor.dart';
+import 'package:diet_app/pages/products/product_view.dart';
 import 'package:diet_app/pages/products/products_list.dart';
 import 'package:flutter/material.dart';
 
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => ProductListPage(),
-        '/product': (context) => ProductEditorPage()
+        '/productEditor': (context) => ProductEditorPage(),
+        '/productView': (context) => ProductView()
       },
     );
   }

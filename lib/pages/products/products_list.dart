@@ -8,8 +8,7 @@ class ProductListPage extends StatefulWidget {
   }
 }
 
-class _ProductListPageState extends State<ProductListPage>{
-
+class _ProductListPageState extends State<ProductListPage> {
   List<Product> products = new List();
 
   @override
@@ -21,12 +20,11 @@ class _ProductListPageState extends State<ProductListPage>{
       body: Center(
         child: ProductsList(products: products),
       ),
-      floatingActionButton:
-      FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            final result = await Navigator.pushNamed(context, '/product');
+            final result = await Navigator.pushNamed(context, '/productEditor');
 
-            if(result != null && result is Product){
+            if (result != null && result is Product) {
               setState(() {
                 products.add(result);
               });
@@ -35,11 +33,9 @@ class _ProductListPageState extends State<ProductListPage>{
           child: Icon(Icons.add)),
     );
   }
-  
 }
 
 class ProductsList extends StatelessWidget {
-
   final List<Product> products;
 
   const ProductsList({Key key, this.products}) : super(key: key);
@@ -47,20 +43,20 @@ class ProductsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      //padding: EdgeInsets.all(16.0),
         itemCount: products.length,
         itemBuilder: (BuildContext ctx, int index) {
-          return new Padding(
-            padding: EdgeInsets.all(8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(products[index].name),
-                Text(products[index].fat.toString())
-              ],
-            ),
+          return ListTile(
+            title: Text(products[index].name),
+            subtitle: Text('Fat: ' +
+                products[index].fat.toString() +
+                ' Carbohydrate: ' +
+                products[index].carbohydrates.toString() +
+                ' Protein: ' +
+                products[index].protein.toString()),
+            onTap: (){
+              Navigator.pushNamed(context, '/productView', arguments: products[index]);
+            },
           );
         });
   }
-
 }

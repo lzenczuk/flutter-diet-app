@@ -2,13 +2,10 @@ import 'package:diet_app/models/product.dart';
 import 'package:flutter/material.dart';
 
 class ProductEditorPage extends StatefulWidget {
-  final Product product;
-
-  const ProductEditorPage({Key key, this.product}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _ProductEditorState(product);
+    return _ProductEditorState();
   }
 }
 
@@ -21,14 +18,6 @@ class _ProductEditorState extends State<ProductEditorPage> {
   FocusNode fatFocusNode;
   FocusNode carbohydrateFocusNode;
   FocusNode proteinFocusNode;
-
-  _ProductEditorState(Product product) {
-    if (product != null) {
-      _product = product;
-    } else {
-      _product = Product();
-    }
-  }
 
   @override
   void initState() {
@@ -46,6 +35,17 @@ class _ProductEditorState extends State<ProductEditorPage> {
     proteinFocusNode.dispose();
 
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _product = ModalRoute.of(context).settings.arguments;
+
+    if(_product==null){
+      _product = Product();
+    }
   }
 
   @override
@@ -90,6 +90,7 @@ class _ProductEditorState extends State<ProductEditorPage> {
                     nameFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(fatFocusNode);
                   },
+                  initialValue: _product.name,
                 ),
                 Text('Nutritions'),
                 NumberFormField(
@@ -102,6 +103,7 @@ class _ProductEditorState extends State<ProductEditorPage> {
                     fatFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(carbohydrateFocusNode);
                   },
+                  initialValue: _product.fat,
                 ),
                 NumberFormField(
                   fieldName: 'Carbohydrate',
@@ -114,6 +116,7 @@ class _ProductEditorState extends State<ProductEditorPage> {
                     carbohydrateFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(proteinFocusNode);
                   },
+                  initialValue: _product.carbohydrates,
                 ),
                 NumberFormField(
                   fieldName: 'Protein',
@@ -121,6 +124,7 @@ class _ProductEditorState extends State<ProductEditorPage> {
                   onSaved: (value) => setState(() => _product.protein = value),
                   textInputAction: TextInputAction.done,
                   focusNode: proteinFocusNode,
+                  initialValue: _product.protein,
                 )
               ],
             ),
@@ -143,6 +147,7 @@ class NumberFormField extends StatelessWidget {
   final TextInputAction textInputAction;
   final FocusNode focusNode;
   final ValueChanged<String> onFieldSubmitted;
+  final double initialValue;
 
   const NumberFormField(
       {Key key,
@@ -151,11 +156,17 @@ class NumberFormField extends StatelessWidget {
       this.onSaved,
       this.textInputAction,
       this.focusNode,
-      this.onFieldSubmitted})
+      this.onFieldSubmitted, this.initialValue})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
+    String iv = '';
+    if(initialValue!=null){
+      iv=initialValue.toString();
+    }
+
     return TextFormField(
       decoration: InputDecoration(labelText: fieldName, hintText: '0'),
       keyboardType: TextInputType.number,
@@ -180,6 +191,7 @@ class NumberFormField extends StatelessWidget {
         onSaved(num);
       },
       onFieldSubmitted: (term) => onFieldSubmitted(term),
+      initialValue: iv,
     );
   }
 }
