@@ -1,3 +1,5 @@
+import 'package:diet_app/data/product_repository.dart';
+import 'package:diet_app/data/repositories.dart';
 import 'package:diet_app/models/product.dart';
 import 'package:flutter/material.dart';
 
@@ -9,16 +11,18 @@ class ProductListPage extends StatefulWidget {
 }
 
 class _ProductListPageState extends State<ProductListPage> {
-  List<Product> products = new List();
 
   @override
   Widget build(BuildContext context) {
+
+    ProductRepository productRepository = RepositoriesProvider.of(context).productRepository;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("App"),
       ),
       body: Center(
-        child: ProductsList(products: products),
+        child: ProductsList(products: productRepository.getAll()),
       ),
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
@@ -26,7 +30,7 @@ class _ProductListPageState extends State<ProductListPage> {
 
             if (result != null && result is Product) {
               setState(() {
-                products.add(result);
+                productRepository.save(result);
               });
             }
           },
@@ -54,7 +58,7 @@ class ProductsList extends StatelessWidget {
                 ' Protein: ' +
                 products[index].protein.toString()),
             onTap: (){
-              Navigator.pushNamed(context, '/productView', arguments: products[index]);
+              Navigator.pushNamed(context, '/productView', arguments: products[index].id);
             },
           );
         });
