@@ -1,6 +1,7 @@
 import 'package:diet_app/pages/products/product_editor.dart';
 import 'package:diet_app/pages/products/product_view.dart';
 import 'package:diet_app/pages/products/products_list.dart';
+import 'package:diet_app/pages/recipes/recipes_list.dart';
 import 'package:flutter/material.dart';
 
 import 'data/product_repository.dart';
@@ -34,7 +35,8 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (context) => ProductListPage(),
           '/productEditor': (context) => ProductEditorPage(),
-          '/productView': (context) => ProductView()
+          '/productView': (context) => ProductView(),
+          '/recipes': (context) => RecipesListPage(),
         },
       ),
     );

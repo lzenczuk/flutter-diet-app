@@ -1,6 +1,7 @@
 import 'package:diet_app/data/product_repository.dart';
 import 'package:diet_app/data/repositories.dart';
 import 'package:diet_app/models/product.dart';
+import 'package:diet_app/widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
 
 class ProductListPage extends StatefulWidget {
@@ -19,20 +20,15 @@ class _ProductListPageState extends State<ProductListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("App"),
+        title: Text("Products"),
       ),
+      drawer: MainDrawer(active: "Products",),
       body: Center(
         child: ProductsList(products: productRepository.getAll()),
       ),
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            final result = await Navigator.pushNamed(context, '/productEditor');
-
-            if (result != null && result is Product) {
-              setState(() {
-                productRepository.save(result);
-              });
-            }
+            Navigator.pushNamed(context, '/productEditor');
           },
           child: Icon(Icons.add)),
     );
