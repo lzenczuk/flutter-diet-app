@@ -28,6 +28,7 @@ class MainDrawer extends StatelessWidget {
           header,
           ...sections,
         ],
+        padding: const EdgeInsets.all(0.0),
       ),
     );
   }
