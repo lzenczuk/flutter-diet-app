@@ -3,47 +3,66 @@ import 'package:flutter/material.dart';
 
 class ProductTitle extends StatelessWidget {
   final Product product;
+  final bool selectable;
+  final bool selected;
   final GestureTapCallback onTap;
+  final ValueChanged<bool> onChanged;
 
-  const ProductTitle({Key key, this.product, this.onTap}) : super(key: key);
+  const ProductTitle({Key key, this.product, this.onTap, this.selectable = false, this.selected = false, this.onChanged}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              product.name,
-              style: Theme.of(context).textTheme.title,
-            ),
-            IntrinsicHeight(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: GestureDetector(
+              onTap: onTap,
+              behavior: HitTestBehavior.translucent,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  _NutritionInfo(
-                    name: 'Fat',
-                    value: product.fat,
+                  Container(
+                    padding: EdgeInsets.only(bottom: 4.0),
+                    child: Text(
+                      product.name,
+                      style: Theme.of(context).textTheme.title,
+                    ),
                   ),
-                  VerticalDivider(),
-                  _NutritionInfo(
-                    name: 'Carbs',
-                    value: product.carbohydrates,
-                  ),
-                  VerticalDivider(),
-                  _NutritionInfo(
-                    name: 'Protein',
-                    value: product.protein,
+                  IntrinsicHeight(
+                    child: Row(
+                      children: <Widget>[
+                        _NutritionInfo(
+                          name: 'Fat',
+                          value: product.fat,
+                        ),
+                        VerticalDivider(),
+                        _NutritionInfo(
+                          name: 'Carbs',
+                          value: product.carbohydrates,
+                        ),
+                        VerticalDivider(),
+                        _NutritionInfo(
+                          name: 'Protein',
+                          value: product.protein,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          Visibility(
+            visible: selectable,
+            child: Checkbox(
+              value: selected,
+              onChanged: onChanged,
+            ),
+          )
+        ],
       ),
     );
   }
@@ -57,15 +76,18 @@ class _NutritionInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: <Widget>[
-        Text(
-          name,
-          style: Theme.of(context).textTheme.caption,
+        Padding(
+          child: Text(
+            name,
+            style: Theme.of(context).textTheme.caption,
+          ),
+          padding: EdgeInsets.only(right: 4.0),
         ),
         Text(
           value.toString(),
-          style: Theme.of(context).textTheme.subhead,
+          style: Theme.of(context).textTheme.caption.apply(fontWeightDelta: 100),
         ),
       ],
     );
