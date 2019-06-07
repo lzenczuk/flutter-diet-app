@@ -13,9 +13,11 @@ class ProductTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
+    return Container(
+      padding: EdgeInsets.only(left: 16, top: 4),
+      height: 6*8.0,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
             child: GestureDetector(
