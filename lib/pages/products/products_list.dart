@@ -12,10 +12,10 @@ class ProductListPage extends StatefulWidget {
   }
 }
 
-enum ProductListActions { select }
+enum ProductListActions { select, selectAll }
 
 class _ProductListPageState extends State<ProductListPage> {
-  bool _selectable = false;
+  bool _inSelectMode = false;
   Set<String> _selected = new Set();
 
   @override
@@ -38,9 +38,9 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   FloatingActionButton buildFloatingActionButton(BuildContext context) {
-    if(_selectable){
+    if (_inSelectMode) {
       return null;
-    }else{
+    } else {
       return FloatingActionButton(
           onPressed: () async {
             Navigator.pushNamed(context, '/productEditor');
@@ -49,28 +49,28 @@ class _ProductListPageState extends State<ProductListPage> {
     }
   }
 
-  Widget buildAppBarTitle(BuildContext context){
-    if(_selectable && _selected.length==0){
+  Widget buildAppBarTitle(BuildContext context) {
+    if (_inSelectMode && _selected.length == 0) {
       return Text("Select products");
-    }else if(_selectable && _selected.length>0){
-      return Text(_selected.length.toString()+" selected");
-    }else{
+    } else if (_inSelectMode && _selected.length > 0) {
+      return Text(_selected.length.toString() + " selected");
+    } else {
       return Text("Products");
     }
   }
 
   IconButton buildAppBarLeading(BuildContext context) {
-    if(_selectable){
+    if (_inSelectMode) {
       return IconButton(
-          icon: Icon(Icons.close),
-        onPressed: (){
-            setState(() {
-              _selectable = false;
-              _selected = new Set();
-            });
+        icon: Icon(Icons.close),
+        onPressed: () {
+          setState(() {
+            _inSelectMode = false;
+            _selected = new Set();
+          });
         },
       );
-    }else{
+    } else {
       return null;
     }
   }
@@ -80,7 +80,7 @@ class _ProductListPageState extends State<ProductListPage> {
       child: ProductsList(
         products: RepositoriesProvider.of(context).productRepository.getAll(),
         selected: _selected,
-        selectable: _selectable,
+        selectable: _inSelectMode,
         onChange: (id) {
           setState(() {
             if (_selected.contains(id)) {
@@ -100,41 +100,117 @@ class _ProductListPageState extends State<ProductListPage> {
     );
   }
 
-  List<Widget> buildAppBarPopupMenu(
-      BuildContext context) {
-    if(_selectable){
-      return [];
-    }else{
-      return [PopupMenuButton<ProductListActions>(
-        itemBuilder: (BuildContext context) => [
-          PopupMenuItem(
-            child: Text("Select"),
-            value: ProductListActions.select,
-          )
-        ],
-        onSelected: (action) {
-          switch (action) {
-            case ProductListActions.select:
+  List<Widget> buildAppBarPopupMenu(BuildContext context) {
+    var numberOfAvailableProducts =
+        RepositoriesProvider.of(context).productRepository.getAll().length;
+
+    if (_inSelectMode || numberOfAvailableProducts > 0) {
+      return [
+        PopupMenuButton<ProductListActions>(
+          itemBuilder: (BuildContext context) {
+            List<PopupMenuEntry<ProductListActions>> items = [];
+
+            if (_inSelectMode) {
+              items.add(PopupMenuItem(
+                child: Text("Select all"),
+                value: ProductListActions.selectAll,
+              ));
+            } else {
+              if (numberOfAvailableProducts != 0) {
+                items.add(PopupMenuItem(
+                  child: Text("Select"),
+                  value: ProductListActions.select,
+                ));
+              }
+            }
+
+            return items;
+          },
+          onSelected: (action) {
+            if (ProductListActions.select == action) {
               setState(() {
-                _selectable = true;
+                _inSelectMode = true;
                 _selected = new Set();
               });
-          }
-        },
-      )];
+            } else if (ProductListActions.selectAll == action) {
+              setState(() {
+                _inSelectMode = true;
+                _selected = RepositoriesProvider.of(context)
+                    .productRepository
+                    .getAll()
+                    .map((p) => p.id)
+                    .toSet();
+              });
+            }
+          },
+        )
+      ];
+    } else {
+      return [];
     }
   }
 
-  List<Widget> buildAppBarActions(BuildContext context){
-
+  List<Widget> buildAppBarActions(BuildContext context) {
     List<Widget> actionButtons = [];
 
-    if(_selectable){
-      if(_selected.length>0){
-        actionButtons.add(IconButton(icon: Icon(Icons.add_box), onPressed: null));
-        actionButtons.add(IconButton(icon: Icon(Icons.delete), onPressed: null));
+    if (_inSelectMode) {
+      if (_selected.length > 0) {
+        actionButtons.add(IconButton(
+            icon: Icon(Icons.add_box), color: Colors.white, onPressed: null));
+        actionButtons.add(Builder(
+          // Dialog have it's own context. To show snackbar we need
+          // to have access to page context.
+          builder: (pageContext) => IconButton(
+              icon: Icon(Icons.delete),
+              color: Colors.white,
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        content: Text("Selected products will be removed."),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text("Cancel"),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          FlatButton(
+                            child: Text("Delete"),
+                            onPressed: () {
+                              var numberOfDeletedProducts = _selected.length;
+                              _selected.forEach((id) =>
+                                  RepositoriesProvider.of(context)
+                                      .productRepository
+                                      .remove(id));
+
+                              setState(() {
+                                _inSelectMode = false;
+                                _selected = Set();
+                              });
+                              Navigator.of(context).pop();
+                              var sbMessage =
+                                  numberOfDeletedProducts.toString() +
+                                      " products deleted";
+                              if (numberOfDeletedProducts == 1) {
+                                sbMessage = "1 product deleted";
+                              }
+                              Scaffold.of(pageContext).showSnackBar(SnackBar(
+                                content: Text(sbMessage),
+                                duration: Duration(seconds: 3),
+                              ));
+                            },
+                          ),
+                        ],
+                      );
+                    });
+              }),
+        ));
       }
     }
+
+    /*
+
+     */
 
     return actionButtons;
   }
