@@ -5,6 +5,7 @@ import 'package:diet_app/pages/recipes/recipes_list.dart';
 import 'package:flutter/material.dart';
 
 import 'data/product_repository.dart';
+import 'data/recipes_repository.dart';
 import 'data/repositories.dart';
 
 void main() => runApp(MyApp());
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepositoriesProvider(
       productRepository: ProductRepositoryMemoryImpl(),
+      recipesRepository: RecipesRepositoryMemoryImpl.withTestData(),
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
