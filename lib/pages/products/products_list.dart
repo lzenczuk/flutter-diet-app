@@ -236,8 +236,9 @@ class ProductsList extends StatelessWidget {
         itemCount: products.length,
         itemBuilder: (BuildContext ctx, int index) {
           return Card(
-            child: ProductTitle(
-              product: products[index],
+            child: NutritionTitle(
+              name: products[index].name,
+              nutrition: products[index].nutrition,
               selectable: selectable,
               selected: selected.contains(products[index].id),
               onTap: () {

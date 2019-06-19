@@ -1,14 +1,6 @@
 
 import 'package:uuid/uuid.dart';
 
-class Nutrition {
-  final double fat;
-  final double protein;
-  final double carbohydrate;
-  
-  Nutrition(this.fat, this.protein, this.carbohydrate);
-}
-
 abstract class Ingredient {
   double _amount;
 

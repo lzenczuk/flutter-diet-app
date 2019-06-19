@@ -9,15 +9,6 @@ abstract class RecipesRepository {
 
 class RecipesRepositoryMemoryImpl implements RecipesRepository{
 
-  RecipesRepositoryMemoryImpl.withTestData(){
-    save(Recipe.create("Test recipe 1", [ProductIngredient("0", 25), ProductIngredient("1", 88)]));
-    save(Recipe.create("Test recipe 2", [ProductIngredient("0", 33), ProductIngredient("2", 120)]));
-    save(Recipe.create("Test recipe 3", [ProductIngredient("1", 55), ProductIngredient("6", 15)]));
-    save(Recipe.create("Test recipe 4", [ProductIngredient("0", 25), ProductIngredient("1", 88)]));
-  }
-
-  RecipesRepositoryMemoryImpl();
-
   List<Recipe> _recipes_list = List();
   Map<String, Recipe> _recipe_by_id = Map();
 

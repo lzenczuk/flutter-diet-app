@@ -1,14 +1,15 @@
-import 'package:diet_app/models/product.dart';
+import 'package:diet_app/models/nutrition.dart';
 import 'package:flutter/material.dart';
 
-class ProductTitle extends StatelessWidget {
-  final Product product;
+class NutritionTitle extends StatelessWidget {
+  final String name;
+  final Nutrition nutrition;
   final bool selectable;
   final bool selected;
   final GestureTapCallback onTap;
   final ValueChanged<bool> onChanged;
 
-  const ProductTitle({Key key, this.product, this.onTap, this.selectable = false, this.selected = false, this.onChanged}) : super(key: key);
+  const NutritionTitle({Key key, this.onTap, this.selectable = false, this.selected = false, this.onChanged, this.name, this.nutrition}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class ProductTitle extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.only(bottom: 4.0),
                     child: Text(
-                      product.name,
+                      name,
                       style: Theme.of(context).textTheme.title,
                     ),
                   ),
@@ -38,17 +39,17 @@ class ProductTitle extends StatelessWidget {
                       children: <Widget>[
                         _NutritionInfo(
                           name: 'Fat',
-                          value: product.fat,
+                          value: nutrition.fat,
                         ),
                         VerticalDivider(),
                         _NutritionInfo(
                           name: 'Carbs',
-                          value: product.carbohydrates,
+                          value: nutrition.carbohydrate,
                         ),
                         VerticalDivider(),
                         _NutritionInfo(
                           name: 'Protein',
-                          value: product.protein,
+                          value: nutrition.protein,
                         ),
                       ],
                     ),
@@ -88,7 +89,7 @@ class _NutritionInfo extends StatelessWidget {
           padding: EdgeInsets.only(right: 4.0),
         ),
         Text(
-          value.toString(),
+          value.toStringAsFixed(2),
           style: Theme.of(context).textTheme.caption.apply(fontWeightDelta: 100),
         ),
       ],
