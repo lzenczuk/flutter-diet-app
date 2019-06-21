@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 class NutritionTitle extends StatelessWidget {
   final String name;
   final Nutrition nutrition;
-  final bool selectable;
+  final bool inSelectMode;
   final bool selected;
   final GestureTapCallback onTap;
   final ValueChanged<bool> onChanged;
 
-  const NutritionTitle({Key key, this.onTap, this.selectable = false, this.selected = false, this.onChanged, this.name, this.nutrition}) : super(key: key);
+  const NutritionTitle({Key key, this.onTap, this.inSelectMode = false, this.selected = false, this.onChanged, this.name, this.nutrition}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class NutritionTitle extends StatelessWidget {
             ),
           ),
           Visibility(
-            visible: selectable,
+            visible: inSelectMode,
             child: Checkbox(
               value: selected,
               onChanged: onChanged,

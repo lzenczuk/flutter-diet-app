@@ -1,8 +1,6 @@
-import 'package:diet_app/data/recipes_repository.dart';
 import 'package:diet_app/data/repositories.dart';
 import 'package:diet_app/models/nutrition.dart';
 import 'package:diet_app/models/recipe.dart';
-import 'package:diet_app/widgets/leading_button.dart';
 import 'package:diet_app/widgets/main_drawer.dart';
 import 'package:diet_app/widgets/products/product_title.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +27,9 @@ class _RecipesListPageState extends State<RecipesListPage> {
       ),
       body: Center(
         child: _RecipesList(
+          inSelectMode: _inSelectMode,
+          selectedRecipes: _selectedRecipes,
+          onRecipeSelectionChange: onRecipeSelectionChange,
           recipes: recipes,
         )
       ),
@@ -128,6 +129,16 @@ class _RecipesListPageState extends State<RecipesListPage> {
       });
     }
   }
+
+  void onRecipeSelectionChange(String id){
+    setState(() {
+      if(_selectedRecipes.contains(id)){
+        _selectedRecipes.remove(id);
+      }else{
+        _selectedRecipes.add(id);
+      }
+    });
+  }
 }
 
 class SimpleMenuAction {
@@ -172,11 +183,16 @@ class _RecipesListFloatingButton extends StatelessWidget {
   }
 }
 
+typedef void IdCallback(String id);
+
 class _RecipesList extends StatelessWidget {
 
   final List<Recipe> recipes;
+  final bool inSelectMode;
+  final Set<String> selectedRecipes;
+  final IdCallback onRecipeSelectionChange;
 
-  const _RecipesList({Key key, this.recipes}) : super(key: key);
+  const _RecipesList({Key key, this.recipes, this.inSelectMode, this.selectedRecipes, this.onRecipeSelectionChange}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -199,6 +215,9 @@ class _RecipesList extends StatelessWidget {
           });
 
           return NutritionTitle(
+            inSelectMode: inSelectMode,
+            selected: selectedRecipes.contains(recipe.id),
+            onChanged: (_) => onRecipeSelectionChange(recipe.id),
             name: recipe.name,
             nutrition: summaryNutrition,
           );

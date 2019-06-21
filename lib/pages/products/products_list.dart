@@ -239,7 +239,7 @@ class ProductsList extends StatelessWidget {
             child: NutritionTitle(
               name: products[index].name,
               nutrition: products[index].nutrition,
-              selectable: selectable,
+              inSelectMode: selectable,
               selected: selected.contains(products[index].id),
               onTap: () {
                 Navigator.pushNamed(context, '/productView',
