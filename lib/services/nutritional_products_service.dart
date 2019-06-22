@@ -27,6 +27,21 @@ class NutritionalProductsService {
     return nutritionalProductsRepository.getProductById(id);
   }
 
+  Future<Optional<Recipe>> getRecipeById(String id) async {
+    Optional<Recipe> opRecipe =  await nutritionalProductsRepository.getRecipeById(id);
+    
+    if(opRecipe.isPresent){
+      Recipe recipe = opRecipe.value;
+
+      List<Ingredient> ingredients = await nutritionalProductsRepository.findIngredientsByRecipeId(recipe.id);
+      recipe.ingredients = ingredients;
+
+      return Optional.of(recipe);
+    }
+    
+    return opRecipe;
+  }
+
   Future<String> saveProduct(Product product){
     //TODO - logic to update recipes having this product as ingredients
     if(product.id==null){

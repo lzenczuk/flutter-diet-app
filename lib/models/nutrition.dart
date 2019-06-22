@@ -44,6 +44,11 @@ class NutritionalProductSummary {
 class Ingredient {
   NutritionalProductSummary nutritionalProductSummary;
   double amount;
+
+  Ingredient.fromMap(Map<String, dynamic> map) {
+    nutritionalProductSummary = NutritionalProductSummary.fromMap(map);
+    amount = map['amount'];
+  }
 }
 
 class Recipe {
@@ -54,6 +59,14 @@ class Recipe {
   double protein;
 
   List<Ingredient> ingredients = List();
+
+  Recipe.fromMap(Map<String, dynamic> map) {
+    this.id=map['id'];
+    this.name=map['name'];
+    this.fat=map['fat'];
+    this.carbs=map['carbs'];
+    this.protein=map['protein'];
+  }
 }
 
 class Product {
@@ -87,15 +100,4 @@ class Product {
       'protein': protein
     };
   }
-
-  /*Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
-      columnTitle: title,
-      columnDone: done == true ? 1 : 0
-    };
-    if (id != null) {
-      map[columnId] = id;
-    }
-    return map;
-  }*/
 }

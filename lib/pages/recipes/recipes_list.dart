@@ -21,6 +21,8 @@ class _RecipesListPageState extends State<RecipesListPage> {
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
+
     _nutritionalProductsService = RepositoriesProvider
         .of(context)
         .nutritionalProductsService;
@@ -228,6 +230,10 @@ class _RecipesList extends StatelessWidget {
             onChanged: (_) => onRecipeSelectionChange(recipe.id),
             name: recipe.name,
             nutrition: recipe.nutrition,
+            onTap: () {
+              Navigator.pushNamed(context, '/recipeView',
+                  arguments: recipe.id);
+            },
           );
         });
   }

@@ -71,6 +71,20 @@ class NutritionalProductsRepository {
     });
   }
 
+  Future<Optional<Recipe>> getRecipeById(String id) async {
+    return await _db.query('recipes',
+        columns: ['id', 'name', 'fat', 'carbs', 'protein'],
+        where: 'id=?',
+        whereArgs: [id]
+    ).then((maps){
+      if(maps.length==0){
+        return Optional.empty();
+      }else{
+        return Optional.ofNullable(Recipe.fromMap(maps[0]));
+      }
+    });
+  }
+
   Future<void> deleteProduct(String productId) async {
     return await _db.delete('products',
     where: 'id = ?', whereArgs: [productId]);
@@ -86,6 +100,16 @@ class NutritionalProductsRepository {
       where: 'id=?',
       whereArgs: [product.id]
     );
+  }
+  
+  Future<List<Ingredient>> findIngredientsByRecipeId(String id) async {
+    return await _db.rawQuery(SELECT_INGREDIENTS_BY_RECIPE_ID, [id, id]).then((maps){
+      if(maps!=null && maps.length>0){
+        return maps.map((m) => Ingredient.fromMap(m)).toList(growable: false);
+      }else{
+        return [];
+      }
+    });
   }
 }
 
@@ -174,3 +198,29 @@ values ('fbfbae05-da33-46ea-8506-d16e8814e9d5', '841f5005-f140-4ce2-97d8-4b1bd3c
 '''insert into recipe_ingredients (recipe_id, ingredient_recipe_id, amount)
 values ('fbfbae05-da33-46ea-8506-d16e8814e9d5', 'a67e8b07-66be-4f19-be7c-f6278836be2e', 40)''',
 ];
+
+const String SELECT_INGREDIENTS_BY_RECIPE_ID = '''
+select pi.id                         as id,
+       'PRODUCT'                     as type,
+       pi.name                       as name,
+       i.amount                      as amount,
+       pi.fat * (i.amount / 100)     as fat,
+       pi.carbs * (i.amount / 100)   as carbs,
+       pi.protein * (i.amount / 100) as protein
+from recipe_ingredients as i
+         INNER JOIN recipes as r ON i.recipe_id = r.id
+         INNER JOIN products as pi ON i.ingredient_product_id = pi.id
+where i.recipe_id = ?
+union
+select ri.id                         as id,
+       'RECIPE'                      as type,
+       ri.name                       as name,
+       i.amount                      as amount,
+       ri.fat * (i.amount / 100)     as fat,
+       ri.carbs * (i.amount / 100)   as carbs,
+       ri.protein * (i.amount / 100) as protein
+from recipe_ingredients as i
+         INNER JOIN recipes as r ON i.recipe_id = r.id
+         INNER JOIN recipes as ri ON i.ingredient_recipe_id = ri.id
+where i.recipe_id = ?
+''';

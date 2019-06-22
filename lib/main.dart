@@ -1,6 +1,7 @@
 import 'package:diet_app/pages/products/product_editor.dart';
 import 'package:diet_app/pages/products/product_view.dart';
 import 'package:diet_app/pages/products/products_list.dart';
+import 'package:diet_app/pages/recipes/recipe_view.dart';
 import 'package:diet_app/pages/recipes/recipes_list.dart';
 import 'package:diet_app/services/nutritional_products_service.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,7 @@ class MyApp extends StatelessWidget {
           '/productEditor': (context) => ProductEditorPage(),
           '/productView': (context) => ProductView(),
           '/recipes': (context) => RecipesListPage(),
+          '/recipeView': (context) => RecipeViewPage(),
         },
       ),
     );
