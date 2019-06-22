@@ -20,3 +20,38 @@ class Nutrition {
 abstract class HasNutrition {
   Nutrition get nutrition;
 }
+
+enum NutritionalProductType {
+  RECIPE, PRODUCT
+}
+
+class NutritionalProductSummary {
+  NutritionalProductType type;
+  String id;
+  String name;
+  Nutrition nutrition;
+
+  NutritionalProductSummary(this.type, this.id, this.name, this.nutrition);
+
+  NutritionalProductSummary.fromMap(Map<String, dynamic> map) {
+        this.id=map['id'];
+        this.name=map['name'];
+        this.type=NutritionalProductType.RECIPE;
+        this.nutrition=Nutrition(map['fat'], map['protein'], map['carbs']);
+  }
+}
+
+class Ingredient {
+  NutritionalProductSummary nutritionalProductSummary;
+  double amount;
+}
+
+class Recipe {
+  String id;
+  String name;
+  double summaryFat;
+  double summaryCarb;
+  double summaryProtein;
+
+  List<Ingredient> ingredients = List();
+}

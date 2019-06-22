@@ -1,6 +1,6 @@
 import 'package:diet_app/data/repositories.dart';
 import 'package:diet_app/models/nutrition.dart';
-import 'package:diet_app/models/recipe.dart';
+import 'package:diet_app/services/nutritional_products_service.dart';
 import 'package:diet_app/widgets/main_drawer.dart';
 import 'package:diet_app/widgets/products/product_title.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +15,22 @@ class RecipesListPage extends StatefulWidget {
 class _RecipesListPageState extends State<RecipesListPage> {
   bool _inSelectMode = false;
   Set<String> _selectedRecipes = Set();
+  List<NutritionalProductSummary> _recipes = [];
+
+  NutritionalProductsService _nutritionalProductsService;
+
+  @override
+  void didChangeDependencies() {
+    _nutritionalProductsService = RepositoriesProvider.of(context).nutritionalProductsService;
+    _nutritionalProductsService.getAllRecipes().then((recipes){
+      setState(() {
+        _recipes = recipes;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    var recipes = RepositoriesProvider.of(context).recipesRepository.getAll();
 
     return Scaffold(
       appBar: buildAppBar(context),
@@ -30,7 +42,7 @@ class _RecipesListPageState extends State<RecipesListPage> {
           inSelectMode: _inSelectMode,
           selectedRecipes: _selectedRecipes,
           onRecipeSelectionChange: onRecipeSelectionChange,
-          recipes: recipes,
+          recipes: _recipes
         )
       ),
     );
@@ -111,10 +123,7 @@ class _RecipesListPageState extends State<RecipesListPage> {
         _selectedRecipes = Set();
       }
 
-      RepositoriesProvider.of(context)
-          .recipesRepository
-          .getAll()
-          .forEach((Recipe r) => _selectedRecipes.add(r.id));
+      _recipes.forEach((NutritionalProductSummary n) => _selectedRecipes.add(n.id));
     });
   }
 
@@ -187,7 +196,7 @@ typedef void IdCallback(String id);
 
 class _RecipesList extends StatelessWidget {
 
-  final List<Recipe> recipes;
+  final List<NutritionalProductSummary> recipes;
   final bool inSelectMode;
   final Set<String> selectedRecipes;
   final IdCallback onRecipeSelectionChange;
@@ -196,30 +205,17 @@ class _RecipesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    var productRepository = RepositoriesProvider.of(context).productRepository;
-
     return ListView.builder(
       itemCount: recipes.length,
         itemBuilder: (BuildContext context, int index) {
           var recipe = recipes[index];
-
-          Nutrition summaryNutrition = Nutrition(0.0, 0.0, 0.0);
-
-          recipe.ingredients.forEach((i){
-            if(i is ProductIngredient){
-              var product = productRepository.getProductById((i as ProductIngredient).productId);
-              var portion = i.amount/100.0;
-              summaryNutrition = summaryNutrition + Nutrition(product.fat, product.protein, product.carbohydrates) * portion;
-            }
-          });
 
           return NutritionTitle(
             inSelectMode: inSelectMode,
             selected: selectedRecipes.contains(recipe.id),
             onChanged: (_) => onRecipeSelectionChange(recipe.id),
             name: recipe.name,
-            nutrition: summaryNutrition,
+            nutrition: recipe.nutrition,
           );
         });
   }

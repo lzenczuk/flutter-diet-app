@@ -1,5 +1,5 @@
-import 'package:diet_app/data/product_repository.dart';
 import 'package:diet_app/data/repositories.dart';
+import 'package:diet_app/models/nutrition.dart';
 import 'package:diet_app/models/product.dart';
 import 'package:diet_app/widgets/main_drawer.dart';
 import 'package:diet_app/widgets/products/product_title.dart';
@@ -17,6 +17,20 @@ enum ProductListActions { select, selectAll }
 class _ProductListPageState extends State<ProductListPage> {
   bool _inSelectMode = false;
   Set<String> _selected = new Set();
+  List<NutritionalProductSummary> _products = [];
+
+  @override
+  void didChangeDependencies() {
+    loadProducts();
+  }
+
+  void loadProducts() {
+    RepositoriesProvider.of(context).nutritionalProductsService.getAllProducts().then((products){
+      setState(() {
+        _products = products;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +92,7 @@ class _ProductListPageState extends State<ProductListPage> {
   Center buildBody(BuildContext context) {
     return Center(
       child: ProductsList(
-        products: RepositoriesProvider.of(context).productRepository.getAll(),
+        products: _products,
         selected: _selected,
         selectable: _inSelectMode,
         onChange: (id) {
@@ -101,8 +115,7 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   List<Widget> buildAppBarPopupMenu(BuildContext context) {
-    var numberOfAvailableProducts =
-        RepositoriesProvider.of(context).productRepository.getAll().length;
+    var numberOfAvailableProducts = _products.length;
 
     if (_inSelectMode || numberOfAvailableProducts > 0) {
       return [
@@ -135,9 +148,7 @@ class _ProductListPageState extends State<ProductListPage> {
             } else if (ProductListActions.selectAll == action) {
               setState(() {
                 _inSelectMode = true;
-                _selected = RepositoriesProvider.of(context)
-                    .productRepository
-                    .getAll()
+                _selected = _products
                     .map((p) => p.id)
                     .toSet();
               });
@@ -178,26 +189,33 @@ class _ProductListPageState extends State<ProductListPage> {
                             child: Text("Delete"),
                             onPressed: () {
                               var numberOfDeletedProducts = _selected.length;
-                              _selected.forEach((id) =>
-                                  RepositoriesProvider.of(context)
-                                      .productRepository
-                                      .remove(id));
+                              var futures = <Future>[];
 
-                              setState(() {
-                                _inSelectMode = false;
-                                _selected = Set();
+                              _selected.forEach((id) =>
+                                  futures.add(RepositoriesProvider.of(context)
+                                  .nutritionalProductsService.deleteProduct(id))
+                              );
+
+                              Future.wait(futures).then((_){
+                                setState(() {
+                                  _inSelectMode = false;
+                                  _selected = Set();
+                                });
+
+                                loadProducts();
+
+                                Navigator.of(context).pop();
+                                var sbMessage =
+                                    numberOfDeletedProducts.toString() +
+                                        " products deleted";
+                                if (numberOfDeletedProducts == 1) {
+                                  sbMessage = "1 product deleted";
+                                }
+                                Scaffold.of(pageContext).showSnackBar(SnackBar(
+                                  content: Text(sbMessage),
+                                  duration: Duration(seconds: 3),
+                                ));
                               });
-                              Navigator.of(context).pop();
-                              var sbMessage =
-                                  numberOfDeletedProducts.toString() +
-                                      " products deleted";
-                              if (numberOfDeletedProducts == 1) {
-                                sbMessage = "1 product deleted";
-                              }
-                              Scaffold.of(pageContext).showSnackBar(SnackBar(
-                                content: Text(sbMessage),
-                                duration: Duration(seconds: 3),
-                              ));
                             },
                           ),
                         ],
@@ -217,7 +235,7 @@ class _ProductListPageState extends State<ProductListPage> {
 }
 
 class ProductsList extends StatelessWidget {
-  final List<Product> products;
+  final List<NutritionalProductSummary> products;
   final Set<String> selected;
   final bool selectable;
   final ValueChanged<String> onChange;
