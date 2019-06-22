@@ -1,6 +1,7 @@
 import 'package:diet_app/models/nutrition.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:optional/optional.dart';
 
 class NutritionalProductsRepository {
   Database _db;
@@ -32,7 +33,7 @@ class NutritionalProductsRepository {
     });
   }
 
-  Future<List<NutritionalProductSummary>> getAllRecipes() async {
+  Future<List<NutritionalProductSummary>> getAllRecipesSummary() async {
     return await _db.query('recipes',
         columns: ['id', 'name', 'fat', 'carbs', 'protein']).then((maps) {
       if (maps.length > 0) {
@@ -44,7 +45,7 @@ class NutritionalProductsRepository {
     });
   }
 
-  Future<List<NutritionalProductSummary>> getAllProducts() async {
+  Future<List<NutritionalProductSummary>> getAllProductsSummary() async {
     return await _db.query('products',
         columns: ['id', 'name', 'fat', 'carbs', 'protein']).then((maps) {
       if (maps.length > 0) {
@@ -53,6 +54,20 @@ class NutritionalProductsRepository {
             .toList(growable: false);
       }
       return [];
+    });
+  }
+
+  Future<Optional<Product>> getProductById(String id) async {
+    return await _db.query('products',
+      columns: ['id', 'name', 'fat', 'carbs', 'protein'],
+      where: 'id=?',
+      whereArgs: [id]
+    ).then((maps){
+      if(maps.length==0){
+        return Optional.empty();
+      }else{
+        return Optional.ofNullable(Product.fromMap(maps[0]));
+      }
     });
   }
 

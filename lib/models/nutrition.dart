@@ -49,9 +49,25 @@ class Ingredient {
 class Recipe {
   String id;
   String name;
-  double summaryFat;
-  double summaryCarb;
-  double summaryProtein;
+  double fat;
+  double carbs;
+  double protein;
 
   List<Ingredient> ingredients = List();
+}
+
+class Product {
+  String id;
+  String name;
+  double fat;
+  double carbs;
+  double protein;
+
+  Product.fromMap(Map<String, dynamic> map) {
+    this.id=map['id'];
+    this.name=map['name'];
+    this.fat=map['fat'];
+    this.carbs=map['carbs'];
+    this.protein=map['protein'];
+  }
 }

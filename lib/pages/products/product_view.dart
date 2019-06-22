@@ -1,6 +1,5 @@
-import 'package:diet_app/data/product_repository.dart';
 import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/product.dart';
+import 'package:diet_app/models/nutrition.dart';
 import 'package:flutter/material.dart';
 
 class ProductView extends StatefulWidget {
@@ -17,12 +16,14 @@ class _ProductViewState extends State<ProductView> {
 
     String _productId = ModalRoute.of(context).settings.arguments;
 
-    ProductRepository productRepository = RepositoriesProvider
-        .of(context)
-        .productRepository;
-
     if (_productId != null) {
-      _product = productRepository.getProductById(_productId);
+      RepositoriesProvider.of(context).nutritionalProductsService.getProductById(_productId).then((opProduct){
+          setState(() {
+            if(opProduct.isPresent){
+              _product = opProduct.value;
+            }
+          });
+      });
     }
   }
 
@@ -62,7 +63,7 @@ class _ProductViewState extends State<ProductView> {
                         child: Text('Carbohydrate'))),
                 Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Text(_product.carbohydrates.toString()))
+                    child: Text(_product.carbs.toString()))
               ]),
               TableRow(children: [
                 Padding(

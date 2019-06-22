@@ -116,14 +116,14 @@ class _ProductEditorState extends State<ProductEditorPage> {
                   fieldName: 'Carbohydrate',
                   messageWhenEmpty: 'Please enter amount of carbohydrate',
                   onSaved: (value) =>
-                      setState(() => _product.carbohydrates = value),
+                      setState(() => _product.carbs = value),
                   textInputAction: TextInputAction.next,
                   focusNode: carbohydrateFocusNode,
                   onFieldSubmitted: (term) {
                     carbohydrateFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(proteinFocusNode);
                   },
-                  initialValue: _product.carbohydrates,
+                  initialValue: _product.carbs,
                 ),
                 NumberFormField(
                   fieldName: 'Protein',

@@ -8,7 +8,7 @@ class Product implements HasNutrition{
   String id;
   String name;
   double fat;
-  double carbohydrates;
+  double carbs;
   double protein;
 
   Product(){
@@ -17,17 +17,17 @@ class Product implements HasNutrition{
 
   Product.basic(this.name, this.fat);
 
-  Product.create(this.name, this.fat, this.carbohydrates, this.protein){
+  Product.create(this.name, this.fat, this.carbs, this.protein){
     this.id=productUuid.v4();
   }
 
   @override
   String toString() {
-    return 'Product{id: $id, name: $name, fat: $fat, carbohydrates: $carbohydrates, protein: $protein}';
+    return 'Product{id: $id, name: $name, fat: $fat, carbohydrates: $carbs, protein: $protein}';
   }
 
   @override
-  Nutrition get nutrition => Nutrition(fat, protein, carbohydrates);
+  Nutrition get nutrition => Nutrition(fat, protein, carbs);
 
 
 }
