@@ -61,6 +61,10 @@ class _ProductEditorState extends State<ProductEditorPage> {
           }
         });
       });
+    }else{
+      setState(() {
+        _product = Product();
+      });
     }
   }
 

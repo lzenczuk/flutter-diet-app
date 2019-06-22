@@ -21,8 +21,10 @@ class _RecipesListPageState extends State<RecipesListPage> {
 
   @override
   void didChangeDependencies() {
-    _nutritionalProductsService = RepositoriesProvider.of(context).nutritionalProductsService;
-    _nutritionalProductsService.getAllRecipes().then((recipes){
+    _nutritionalProductsService = RepositoriesProvider
+        .of(context)
+        .nutritionalProductsService;
+    _nutritionalProductsService.getAllRecipes().then((recipes) {
       setState(() {
         _recipes = recipes;
       });
@@ -31,19 +33,24 @@ class _RecipesListPageState extends State<RecipesListPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: buildAppBar(context),
       drawer: MainDrawer(
         active: "Recipes",
       ),
       body: Center(
-        child: _RecipesList(
-          inSelectMode: _inSelectMode,
-          selectedRecipes: _selectedRecipes,
-          onRecipeSelectionChange: onRecipeSelectionChange,
-          recipes: _recipes
-        )
+          child: _RecipesList(
+              inSelectMode: _inSelectMode,
+              selectedRecipes: _selectedRecipes,
+              onRecipeSelectionChange: onRecipeSelectionChange,
+              recipes: _recipes
+          )
+      ),
+      floatingActionButton: _inSelectMode ? null : FloatingActionButton(
+          onPressed: () async {
+            Navigator.pushNamed(context, '/productEditor');
+          },
+          child: Icon(Icons.add)
       ),
     );
   }
@@ -123,13 +130,16 @@ class _RecipesListPageState extends State<RecipesListPage> {
         _selectedRecipes = Set();
       }
 
-      _recipes.forEach((NutritionalProductSummary n) => _selectedRecipes.add(n.id));
+      _recipes.forEach((NutritionalProductSummary n) =>
+          _selectedRecipes.add(n.id));
     });
   }
 
   void onDeletePressed() {
     if (_inSelectMode) {
-      var repository = RepositoriesProvider.of(context).recipesRepository;
+      var repository = RepositoriesProvider
+          .of(context)
+          .recipesRepository;
 
       setState(() {
         _inSelectMode = false;
@@ -139,11 +149,11 @@ class _RecipesListPageState extends State<RecipesListPage> {
     }
   }
 
-  void onRecipeSelectionChange(String id){
+  void onRecipeSelectionChange(String id) {
     setState(() {
-      if(_selectedRecipes.contains(id)){
+      if (_selectedRecipes.contains(id)) {
         _selectedRecipes.remove(id);
-      }else{
+      } else {
         _selectedRecipes.add(id);
       }
     });
@@ -201,12 +211,14 @@ class _RecipesList extends StatelessWidget {
   final Set<String> selectedRecipes;
   final IdCallback onRecipeSelectionChange;
 
-  const _RecipesList({Key key, this.recipes, this.inSelectMode, this.selectedRecipes, this.onRecipeSelectionChange}) : super(key: key);
+  const _RecipesList(
+      {Key key, this.recipes, this.inSelectMode, this.selectedRecipes, this.onRecipeSelectionChange})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: recipes.length,
+        itemCount: recipes.length,
         itemBuilder: (BuildContext context, int index) {
           var recipe = recipes[index];
 
