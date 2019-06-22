@@ -1,6 +1,5 @@
-import 'package:diet_app/data/product_repository.dart';
 import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/product.dart';
+import 'package:diet_app/models/nutrition.dart';
 import 'package:flutter/material.dart';
 
 class ProductEditorPage extends StatefulWidget {
@@ -43,15 +42,25 @@ class _ProductEditorState extends State<ProductEditorPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    String _productId = ModalRoute.of(context).settings.arguments;
-    
-    if(_productId != null){
-      ProductRepository productRepository = RepositoriesProvider.of(context).productRepository;
-      _product = productRepository.getProductById(_productId);
-    }
+    String _productId = ModalRoute
+        .of(context)
+        .settings
+        .arguments;
 
-    if(_product==null){
-      _product = Product();
+    if (_productId != null) {
+      RepositoriesProvider
+          .of(context)
+          .nutritionalProductsService
+          .getProductById(_productId)
+          .then((opProduct) {
+        setState(() {
+          if (opProduct.isPresent) {
+            _product = opProduct.value;
+          } else {
+            _product = Product();
+          }
+        });
+      });
     }
   }
 
@@ -76,7 +85,7 @@ class _ProductEditorState extends State<ProductEditorPage> {
           ],
         ),
         body: SafeArea(
-          child: Form(
+          child: _product==null ? Text('Loading...') : Form(
             key: _formKey,
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -143,10 +152,10 @@ class _ProductEditorState extends State<ProductEditorPage> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
-      ProductRepository productRepository = RepositoriesProvider.of(context).productRepository;
-      productRepository.save(_product);
-      
-      Navigator.pop(context);
+      RepositoriesProvider.of(context).nutritionalProductsService.saveProduct(_product).then((_){
+        //TODO - add error logic support
+        Navigator.pop(context);
+      });
     }
   }
 }

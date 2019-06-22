@@ -75,6 +75,18 @@ class NutritionalProductsRepository {
     return await _db.delete('products',
     where: 'id = ?', whereArgs: [productId]);
   }
+
+  Future<void> insertProduct(Product product) async {
+    return await _db.insert('products', product.toMap());
+  }
+
+  Future<void> updateProduct(Product product) async {
+    return await _db.update('products',
+        product.toMap(),
+      where: 'id=?',
+      whereArgs: [product.id]
+    );
+  }
 }
 
 List<String> _initScripts = [

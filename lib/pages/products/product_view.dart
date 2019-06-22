@@ -18,11 +18,11 @@ class _ProductViewState extends State<ProductView> {
 
     if (_productId != null) {
       RepositoriesProvider.of(context).nutritionalProductsService.getProductById(_productId).then((opProduct){
+        if(opProduct.isPresent){
           setState(() {
-            if(opProduct.isPresent){
               _product = opProduct.value;
-            }
-          });
+            });
+          };
       });
     }
   }
