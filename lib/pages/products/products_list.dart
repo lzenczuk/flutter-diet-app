@@ -1,6 +1,5 @@
 import 'package:diet_app/data/repositories.dart';
 import 'package:diet_app/models/nutrition.dart';
-import 'package:diet_app/models/product.dart';
 import 'package:diet_app/widgets/main_drawer.dart';
 import 'package:diet_app/widgets/products/product_title.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +14,6 @@ class ProductListPage extends StatefulWidget {
 enum ProductListActions { select, selectAll }
 
 class _ProductListPageState extends State<ProductListPage> {
-  bool _inSelectMode = false;
-  Set<String> _selected = new Set();
   List<NutritionalProductSummary> _products = [];
 
   @override
@@ -25,7 +22,10 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   void loadProducts() {
-    RepositoriesProvider.of(context).nutritionalProductsService.getAllProducts().then((products){
+    RepositoriesProvider.of(context)
+        .nutritionalProductsService
+        .getAllProducts()
+        .then((products) {
       setState(() {
         _products = products;
       });
@@ -37,12 +37,8 @@ class _ProductListPageState extends State<ProductListPage> {
     return Center(
       child: Scaffold(
         appBar: AppBar(
-          leading: buildAppBarLeading(context),
           title: buildAppBarTitle(context),
-          actions: <Widget>[
-            ...buildAppBarActions(context),
-            ...buildAppBarPopupMenu(context),
-          ],
+          actions: buildAppBarPopupMenu(context),
         ),
         drawer: buildDrawer(context),
         body: buildBody(context),
@@ -52,58 +48,22 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   FloatingActionButton buildFloatingActionButton(BuildContext context) {
-    if (_inSelectMode) {
-      return null;
-    } else {
-      return FloatingActionButton(
-          onPressed: () async {
-            Navigator.pushNamed(context, '/productEditor');
-          },
-          child: Icon(Icons.add));
-    }
+    return FloatingActionButton(
+        onPressed: () async {
+          Navigator.pushNamed(context, '/productEditor');
+        },
+        child: Icon(Icons.add));
   }
 
   Widget buildAppBarTitle(BuildContext context) {
-    if (_inSelectMode && _selected.length == 0) {
-      return Text("Select products");
-    } else if (_inSelectMode && _selected.length > 0) {
-      return Text(_selected.length.toString() + " selected");
-    } else {
-      return Text("Products");
-    }
-  }
-
-  IconButton buildAppBarLeading(BuildContext context) {
-    if (_inSelectMode) {
-      return IconButton(
-        icon: Icon(Icons.close),
-        onPressed: () {
-          setState(() {
-            _inSelectMode = false;
-            _selected = new Set();
-          });
-        },
-      );
-    } else {
-      return null;
-    }
+    return Text("Products");
   }
 
   Center buildBody(BuildContext context) {
     return Center(
       child: ProductsList(
         products: _products,
-        selected: _selected,
-        selectable: _inSelectMode,
-        onChange: (id) {
-          setState(() {
-            if (_selected.contains(id)) {
-              _selected.remove(id);
-            } else {
-              _selected.add(id);
-            }
-          });
-        },
+        //TODO - on long press switch view to select (scroll?)
       ),
     );
   }
@@ -117,41 +77,32 @@ class _ProductListPageState extends State<ProductListPage> {
   List<Widget> buildAppBarPopupMenu(BuildContext context) {
     var numberOfAvailableProducts = _products.length;
 
-    if (_inSelectMode || numberOfAvailableProducts > 0) {
+    if (numberOfAvailableProducts > 0) {
       return [
         PopupMenuButton<ProductListActions>(
           itemBuilder: (BuildContext context) {
             List<PopupMenuEntry<ProductListActions>> items = [];
 
-            if (_inSelectMode) {
-              items.add(PopupMenuItem(
-                child: Text("Select all"),
-                value: ProductListActions.selectAll,
-              ));
-            } else {
-              if (numberOfAvailableProducts != 0) {
-                items.add(PopupMenuItem(
-                  child: Text("Select"),
-                  value: ProductListActions.select,
-                ));
-              }
-            }
+            items.add(PopupMenuItem(
+              child: Text("Select all"),
+              value: ProductListActions.selectAll,
+            ));
+
+            items.add(PopupMenuItem(
+              child: Text("Select"),
+              value: ProductListActions.select,
+            ));
 
             return items;
           },
           onSelected: (action) {
             if (ProductListActions.select == action) {
-              setState(() {
-                _inSelectMode = true;
-                _selected = new Set();
-              });
+              Navigator.pushNamed(context, '/productsSelect');
             } else if (ProductListActions.selectAll == action) {
-              setState(() {
-                _inSelectMode = true;
-                _selected = _products
-                    .map((p) => p.id)
-                    .toSet();
-              });
+              Set<String> selected = Set();
+              _products.forEach((np) => selected.add(np.id));
+              Navigator.pushNamed(context, '/productsSelect',
+                  arguments: selected);
             }
           },
         )
@@ -159,78 +110,6 @@ class _ProductListPageState extends State<ProductListPage> {
     } else {
       return [];
     }
-  }
-
-  List<Widget> buildAppBarActions(BuildContext context) {
-    List<Widget> actionButtons = [];
-
-    if (_inSelectMode) {
-      if (_selected.length > 0) {
-        actionButtons.add(IconButton(
-            icon: Icon(Icons.add_box), color: Colors.white, onPressed: null));
-        actionButtons.add(Builder(
-          // Dialog have it's own context. To show snackbar we need
-          // to have access to page context.
-          builder: (pageContext) => IconButton(
-              icon: Icon(Icons.delete),
-              color: Colors.white,
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        content: Text("Selected products will be removed."),
-                        actions: <Widget>[
-                          FlatButton(
-                            child: Text("Cancel"),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                          FlatButton(
-                            child: Text("Delete"),
-                            onPressed: () {
-                              var numberOfDeletedProducts = _selected.length;
-                              var futures = <Future>[];
-
-                              _selected.forEach((id) =>
-                                  futures.add(RepositoriesProvider.of(context)
-                                  .nutritionalProductsService.deleteProduct(id))
-                              );
-
-                              Future.wait(futures).then((_){
-                                setState(() {
-                                  _inSelectMode = false;
-                                  _selected = Set();
-                                });
-
-                                loadProducts();
-
-                                Navigator.of(context).pop();
-                                var sbMessage =
-                                    numberOfDeletedProducts.toString() +
-                                        " products deleted";
-                                if (numberOfDeletedProducts == 1) {
-                                  sbMessage = "1 product deleted";
-                                }
-                                Scaffold.of(pageContext).showSnackBar(SnackBar(
-                                  content: Text(sbMessage),
-                                  duration: Duration(seconds: 3),
-                                ));
-                              });
-                            },
-                          ),
-                        ],
-                      );
-                    });
-              }),
-        ));
-      }
-    }
-
-    /*
-
-     */
-
-    return actionButtons;
   }
 }
 
@@ -257,8 +136,6 @@ class ProductsList extends StatelessWidget {
             child: NutritionTitle(
               name: products[index].name,
               nutrition: products[index].nutrition,
-              inSelectMode: selectable,
-              selected: selected.contains(products[index].id),
               onTap: () {
                 Navigator.pushNamed(context, '/productView',
                     arguments: products[index].id);
