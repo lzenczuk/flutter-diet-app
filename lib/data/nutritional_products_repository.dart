@@ -20,12 +20,9 @@ class NutritionalProductsRepository {
         readOnly: false,
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
-          print("----> exec db create");
       var batch = db.batch();
-          print("----> batch: ${batch}");
       _initScripts.forEach((command){
         if(command!=null) {
-          print("----> Run command: ${command}");
           batch.execute(command);
         }
       });
@@ -38,7 +35,7 @@ class NutritionalProductsRepository {
         columns: ['id', 'name', 'fat', 'carbs', 'protein']).then((maps) {
       if (maps.length > 0) {
         return maps
-            .map((map) => NutritionalProductSummary.fromMap(map))
+            .map((map) => NutritionalProductSummary.fromRecipeMap(map))
             .toList(growable: false);
       }
       return [];
@@ -50,7 +47,27 @@ class NutritionalProductsRepository {
         columns: ['id', 'name', 'fat', 'carbs', 'protein']).then((maps) {
       if (maps.length > 0) {
         return maps
-            .map((map) => NutritionalProductSummary.fromMap(map))
+            .map((map) => NutritionalProductSummary.fromProductMap(map))
+            .toList(growable: false);
+      }
+      return [];
+    });
+  }
+
+  Future<List<NutritionalProductSummary>> getProductsByIds(
+      Set<String> ids) async {
+
+    var inQueryString = ids.map((_) => '?').join(", ");
+    var inArgs = ids.toList(growable: false);
+
+    return await _db.query('products',
+        columns: ['id', 'name', 'fat', 'carbs', 'protein'],
+        where: 'id in ($inQueryString)',
+        whereArgs: inArgs)
+        .then((maps) {
+      if (maps.length > 0) {
+        return maps
+            .map((map) => NutritionalProductSummary.fromProductMap(map))
             .toList(growable: false);
       }
       return [];
@@ -94,11 +111,33 @@ class NutritionalProductsRepository {
     return await _db.insert('products', product.toMap());
   }
 
+  Future<void> insertRecipe(Recipe recipe) async {
+    return await _db.insert('recipes', recipe.toMap());
+  }
+
+  Future<void> insertIngredient(String recipeId, Ingredient ingredient) async {
+    print("=====> save ingredent: "+ingredient.toString());
+    var map = ingredient.toMap();
+    map['recipe_id'] = recipeId;
+
+    map.forEach((k, v) => print("======> recipe_ingredient: $k -> $v"));
+
+    return await _db.insert('recipe_ingredients', map);
+  }
+
   Future<void> updateProduct(Product product) async {
     return await _db.update('products',
         product.toMap(),
       where: 'id=?',
       whereArgs: [product.id]
+    );
+  }
+
+  Future<void> updateRecipe(Recipe recipe) async {
+    return await _db.update('recipes',
+        recipe.toMap(),
+        where: 'id=?',
+        whereArgs: [recipe.id]
     );
   }
   
@@ -108,6 +147,16 @@ class NutritionalProductsRepository {
         return maps.map((m) => Ingredient.fromMap(m)).toList(growable: false);
       }else{
         return [];
+      }
+    });
+  }
+
+  Future<Optional<Nutrition>> calculateSummaryNutritionByRecipeId(String id) async {
+    return await _db.rawQuery(SELECT_SUMMARY_NUTRITION_BY_RECIPE_ID, [id, id]).then((maps){
+      if(maps!=null && maps.length>0){
+        return Optional.ofNullable(Nutrition.fromMap(maps[0]));
+      }else{
+        return Optional.empty();
       }
     });
   }
@@ -201,7 +250,7 @@ values ('fbfbae05-da33-46ea-8506-d16e8814e9d5', 'a67e8b07-66be-4f19-be7c-f627883
 
 const String SELECT_INGREDIENTS_BY_RECIPE_ID = '''
 select pi.id                         as id,
-       'PRODUCT'                     as type,
+       'PRODUCT'                     as ingredient_type,
        pi.name                       as name,
        i.amount                      as amount,
        pi.fat * (i.amount / 100)     as fat,
@@ -213,7 +262,7 @@ from recipe_ingredients as i
 where i.recipe_id = ?
 union
 select ri.id                         as id,
-       'RECIPE'                      as type,
+       'RECIPE'                      as ingredient_type,
        ri.name                       as name,
        i.amount                      as amount,
        ri.fat * (i.amount / 100)     as fat,
@@ -223,4 +272,25 @@ from recipe_ingredients as i
          INNER JOIN recipes as r ON i.recipe_id = r.id
          INNER JOIN recipes as ri ON i.ingredient_recipe_id = ri.id
 where i.recipe_id = ?
+''';
+
+const String SELECT_SUMMARY_NUTRITION_BY_RECIPE_ID = '''
+select sum(fat) AS fat, sum(carbs) as carbs, sum(protein) as protein
+from (
+         select pi.fat * (i.amount / 100)     as fat,
+                pi.carbs * (i.amount / 100)   as carbs,
+                pi.protein * (i.amount / 100) as protein
+         from recipe_ingredients as i
+                  INNER JOIN recipes as r ON i.recipe_id = r.id
+                  INNER JOIN products as pi ON i.ingredient_product_id = pi.id
+         where i.recipe_id = ?
+         union
+         select ri.fat * (i.amount / 100)     as fat,
+                ri.carbs * (i.amount / 100)   as carbs,
+                ri.protein * (i.amount / 100) as protein
+         from recipe_ingredients as i
+                  INNER JOIN recipes as r ON i.recipe_id = r.id
+                  INNER JOIN recipes as ri ON i.ingredient_recipe_id = ri.id
+         where i.recipe_id = ?
+     )
 ''';

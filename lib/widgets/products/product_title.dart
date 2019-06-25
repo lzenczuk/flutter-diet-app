@@ -45,7 +45,7 @@ class NutritionTitle extends StatelessWidget {
                         VerticalDivider(),
                         _NutritionInfo(
                           name: 'Carbs',
-                          value: nutrition.carbohydrate,
+                          value: nutrition.carbs,
                         ),
                         VerticalDivider(),
                         _NutritionInfo(
@@ -113,7 +113,7 @@ class IngredientTile extends StatelessWidget {
                         VerticalDivider(),
                         _NutritionInfo(
                           name: 'Carbs',
-                          value: nutrition.carbohydrate,
+                          value: nutrition.carbs,
                         ),
                         VerticalDivider(),
                         _NutritionInfo(

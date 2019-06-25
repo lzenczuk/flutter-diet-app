@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 
 class NutritionalProductsService {
 
-  final Uuid _productUuid = new Uuid();
+  final Uuid _uuidGenerator = new Uuid();
 
   final NutritionalProductsRepository nutritionalProductsRepository;
 
@@ -17,6 +17,10 @@ class NutritionalProductsService {
 
   Future<List<NutritionalProductSummary>> getAllProducts(){
     return nutritionalProductsRepository.getAllProductsSummary();
+  }
+
+  Future<List<NutritionalProductSummary>> getProductsSummaries(Set<String> ids){
+    return nutritionalProductsRepository.getProductsByIds(ids);
   }
 
   Future<void> deleteProduct(String productId){
@@ -45,12 +49,43 @@ class NutritionalProductsService {
   Future<String> saveProduct(Product product){
     //TODO - logic to update recipes having this product as ingredients
     if(product.id==null){
-      var _id = _productUuid.v4();
+      var _id = _uuidGenerator.v4();
       product.id = _id;
       return nutritionalProductsRepository.insertProduct(product).then((_) => _id);
     }else{
       var _id = product.id;
       return nutritionalProductsRepository.updateProduct(product).then((_) => _id);
+    }
+  }
+  
+  Future<String> saveRecipe(Recipe recipe) async {
+    print("-----> Save recipe: "+recipe.toString());
+
+    if(recipe.id==null){
+      var _id = _uuidGenerator.v4();
+      recipe.id = _id;
+      print("------> Insert recipe");
+      await nutritionalProductsRepository.insertRecipe(recipe);
+      print("------> Insert ingrediedients");
+      recipe.ingredients.forEach((i) async => await nutritionalProductsRepository.insertIngredient(_id, i));
+      print("------> Summary");
+      Optional<Nutrition> opNutrition = await nutritionalProductsRepository.calculateSummaryNutritionByRecipeId(_id);
+      opNutrition.ifPresent((n) async {
+
+        print("------> Summary nutrition: "+n.toString());
+
+        recipe.fat = n.fat;
+        recipe.carbs = n.carbs;
+        recipe.protein = n.protein;
+
+        print("------> Update recipe");
+        await nutritionalProductsRepository.updateRecipe(recipe);
+        print("------> Done");
+      });
+
+      return _id;
+    }else{
+      return recipe.id;
     }
   }
 }

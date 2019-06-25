@@ -51,7 +51,7 @@ class _RecipesListPageState extends State<RecipesListPage> {
       ),
       floatingActionButton: _inSelectMode ? null : FloatingActionButton(
           onPressed: () async {
-            Navigator.pushNamed(context, '/productEditor');
+            Navigator.pushNamed(context, '/recipeEditor');
           },
           child: Icon(Icons.add)
       ),
