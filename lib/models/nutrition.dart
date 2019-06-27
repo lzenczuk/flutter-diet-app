@@ -21,6 +21,10 @@ class Nutrition {
     return Nutrition(this.fat * n, this.protein * n, this.carbs * n);
   }
 
+  operator /(Nutrition other) {
+    return Nutrition(this.fat / other.fat, this.protein / other.protein, this.carbs / other.carbs);
+  }
+
   @override
   String toString() {
     return 'Nutrition{fat: $fat, protein: $protein, carbs: $carbs}';
