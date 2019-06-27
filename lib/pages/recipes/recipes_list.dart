@@ -1,6 +1,6 @@
-import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/nutrition.dart';
-import 'package:diet_app/services/nutritional_products_service.dart';
+import 'package:diet_app/services/repositories.dart';
+import 'package:diet_app/models/nutritional_product_summary.dart';
+import 'package:diet_app/services/recipes_and_products_service.dart';
 import 'package:diet_app/widgets/main_drawer.dart';
 import 'package:diet_app/widgets/products/product_title.dart';
 import 'package:diet_app/widgets/simple_popup_menu.dart';
@@ -18,15 +18,15 @@ class _RecipesListPageState extends State<RecipesListPage> {
   Set<String> _selectedRecipes = Set();
   List<NutritionalProductSummary> _recipes = [];
 
-  NutritionalProductsService _nutritionalProductsService;
+  RecipesAndProductsService _nutritionalProductsService;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _nutritionalProductsService = RepositoriesProvider
+    _nutritionalProductsService = ServicesProvider
         .of(context)
-        .nutritionalProductsService;
+        .recipesAndProductsService;
     _nutritionalProductsService.getAllRecipes().then((recipes) {
       setState(() {
         _recipes = recipes;
@@ -139,7 +139,7 @@ class _RecipesListPageState extends State<RecipesListPage> {
   }
 
   void onDeletePressed() {
-    if (_inSelectMode) {
+    /*if (_inSelectMode) {
       var repository = RepositoriesProvider
           .of(context)
           .recipesRepository;
@@ -149,7 +149,7 @@ class _RecipesListPageState extends State<RecipesListPage> {
         _selectedRecipes.forEach((id) => repository.remove(id));
         _selectedRecipes = Set();
       });
-    }
+    }*/
   }
 
   void onRecipeSelectionChange(String id) {

@@ -1,5 +1,6 @@
-import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/nutrition.dart';
+import 'package:diet_app/services/repositories.dart';
+import 'package:diet_app/models/ingredient.dart';
+import 'package:diet_app/models/recipe.dart';
 import 'package:flutter/material.dart';
 import 'package:optional/optional.dart';
 
@@ -43,7 +44,7 @@ class _RecipeEditorPageState extends State<RecipeEditorPage>{
   void validateAndSave(BuildContext context) {
     _recipeFormKey.currentState.save().ifPresent((recipe){
       print("------> new recipe "+recipe.name);
-      RepositoriesProvider.of(context).nutritionalProductsService.saveRecipe(recipe).then((_){
+      ServicesProvider.of(context).recipesAndProductsService.saveRecipe(recipe).then((_){
         Navigator.pop(context);
       });
     });
@@ -139,7 +140,7 @@ class _RecipeFormState extends State<_RecipeForm>{
               child: Text('Add'),
               onPressed: () => Navigator.pushNamed(context, '/productsSelect').then((selectedProducts){
                 if(selectedProducts != null && selectedProducts is Set<String>){
-                  RepositoriesProvider.of(context).nutritionalProductsService.getProductsSummaries(selectedProducts).then((nps){
+                  ServicesProvider.of(context).recipesAndProductsService.getProductsSummaries(selectedProducts).then((nps){
                     setState(() {
                       nps.forEach((nps)=> _ingredients.add(Ingredient(nps, 0.0)));
                     });

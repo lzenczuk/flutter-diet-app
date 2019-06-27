@@ -1,5 +1,5 @@
-import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/nutrition.dart';
+import 'package:diet_app/services/repositories.dart';
+import 'package:diet_app/models/product.dart';
 import 'package:flutter/material.dart';
 
 class ProductEditorPage extends StatefulWidget {
@@ -48,9 +48,9 @@ class _ProductEditorState extends State<ProductEditorPage> {
         .arguments;
 
     if (_productId != null) {
-      RepositoriesProvider
+      ServicesProvider
           .of(context)
-          .nutritionalProductsService
+          .recipesAndProductsService
           .getProductById(_productId)
           .then((opProduct) {
         setState(() {
@@ -156,7 +156,7 @@ class _ProductEditorState extends State<ProductEditorPage> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
-      RepositoriesProvider.of(context).nutritionalProductsService.saveProduct(_product).then((_){
+      ServicesProvider.of(context).recipesAndProductsService.saveProduct(_product).then((_){
         //TODO - add error logic support
         Navigator.pop(context);
       });

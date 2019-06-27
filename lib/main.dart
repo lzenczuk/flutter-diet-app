@@ -5,57 +5,37 @@ import 'package:diet_app/pages/products/products_selection.dart';
 import 'package:diet_app/pages/recipes/recipe_editor.dart';
 import 'package:diet_app/pages/recipes/recipe_view.dart';
 import 'package:diet_app/pages/recipes/recipes_list.dart';
-import 'package:diet_app/services/nutritional_products_service.dart';
+import 'package:diet_app/services/recipes_and_products_service.dart';
 import 'package:flutter/material.dart';
 
-import 'data/nutritional_products_repository.dart';
+import 'data/data_source.dart';
+import 'data/ingredients_repository.dart';
 import 'data/product_repository.dart';
 import 'data/recipes_repository.dart';
-import 'data/repositories.dart';
-import 'models/product.dart';
-import 'models/recipe.dart';
+import 'package:diet_app/services/repositories.dart';
 
 Future main() async {
-  var productRepository = ProductRepositoryMemoryImpl();
-  var recipesRepository = RecipesRepositoryMemoryImpl();
+  var dataSource = DataSource();
+  await dataSource.init();
 
-  var nutritionalProductsRepository = NutritionalProductsRepository();
-  await nutritionalProductsRepository.init();
-  var nutritionalProductsService = NutritionalProductsService(nutritionalProductsRepository);
+  var productRepository = ProductRepositoryImpl(dataSource.db);
+  var recipesRepository = RecipesRepositoryImpl(dataSource.db);
+  var ingredientsRepository = IngredientsRepositoryImpl(dataSource.db);
+  
+  var nutritionalProductsService = RecipesAndProductsService(productRepository, recipesRepository, ingredientsRepository);
 
-  setup(productRepository, recipesRepository);
-  runApp(MyApp(productRepository, recipesRepository, nutritionalProductsService));
-}
-
-void setup(ProductRepository productRepository, RecipesRepository recipesRepository){
-  var beefMinced = Product.create("Beef minced", 24.4, 16.2, 59.3);
-  productRepository.save(beefMinced);
-
-  var broccoli = Product.create("Broccoli", 0.4, 7, 2.8);
-  productRepository.save(broccoli);
-
-  var cheddar = Product.create("Cheddar", 35, 0.5, 26);
-  productRepository.save(cheddar);
-
-  var bfsth = Recipe("Beef something");
-  bfsth.addIngredient(ProductIngredient(beefMinced.id, 720.0/3.0));
-  bfsth.addIngredient(ProductIngredient(cheddar.id, 50));
-  recipesRepository.save(bfsth);
+  runApp(MyApp(nutritionalProductsService));
 }
 
 class MyApp extends StatelessWidget {
-  final ProductRepository productRepository;
-  final RecipesRepository recipesRepository;
-  final NutritionalProductsService nutritionalProductsService;
+  final RecipesAndProductsService recipesAndProductsService;
 
-  MyApp(this.productRepository, this.recipesRepository, this.nutritionalProductsService);
+  MyApp(this.recipesAndProductsService);
 
   @override
   Widget build(BuildContext context) {
-    return RepositoriesProvider(
-      productRepository: productRepository,
-      recipesRepository: recipesRepository,
-      nutritionalProductsService: nutritionalProductsService,
+    return ServicesProvider(
+      recipesAndProductsService: recipesAndProductsService,
       child: MaterialApp(
         title: 'Diet app',
         initialRoute: '/',

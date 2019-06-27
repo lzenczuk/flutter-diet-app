@@ -1,5 +1,5 @@
-import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/nutrition.dart';
+import 'package:diet_app/services/repositories.dart';
+import 'package:diet_app/models/nutritional_product_summary.dart';
 import 'package:diet_app/widgets/main_drawer.dart';
 import 'package:diet_app/widgets/products/product_title.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +31,7 @@ class _ProductListSelectionPageState extends State<ProductListSelectionPage> {
   }
 
   void loadProducts() {
-    RepositoriesProvider.of(context).nutritionalProductsService.getAllProducts().then((products){
+    ServicesProvider.of(context).recipesAndProductsService.getAllProducts().then((products){
       setState(() {
         _products = products;
       });
@@ -160,8 +160,8 @@ class _ProductListSelectionPageState extends State<ProductListSelectionPage> {
                               var futures = <Future>[];
 
                               _selected.forEach((id) =>
-                                  futures.add(RepositoriesProvider.of(context)
-                                  .nutritionalProductsService.deleteProduct(id))
+                                  futures.add(ServicesProvider.of(context)
+                                  .recipesAndProductsService.deleteProduct(id))
                               );
 
                               Future.wait(futures).then((_){

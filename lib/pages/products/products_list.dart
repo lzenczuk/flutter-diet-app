@@ -1,5 +1,5 @@
-import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/nutrition.dart';
+import 'package:diet_app/services/repositories.dart';
+import 'package:diet_app/models/nutritional_product_summary.dart';
 import 'package:diet_app/widgets/main_drawer.dart';
 import 'package:diet_app/widgets/products/product_title.dart';
 import 'package:flutter/material.dart';
@@ -22,8 +22,8 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   void loadProducts() {
-    RepositoriesProvider.of(context)
-        .nutritionalProductsService
+    ServicesProvider.of(context)
+        .recipesAndProductsService
         .getAllProducts()
         .then((products) {
       setState(() {

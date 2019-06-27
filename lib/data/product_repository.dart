@@ -1,41 +1,91 @@
+import 'package:diet_app/models/nutritional_product_summary.dart';
 import 'package:diet_app/models/product.dart';
+import 'package:optional/optional.dart';
+import 'package:sqflite/sqflite.dart';
 
-abstract class ProductRepository {
-  List<Product> getAll();
-  Product save(Product p);
-  Product getProductById(String id);
-  bool remove(String id);
+abstract class ProductsRepository {
+  Future<List<NutritionalProductSummary>> getAllProductsSummary();
+  Future<List<NutritionalProductSummary>> getProductsByIds(Set<String> ids);
+
+  Future<Optional<Product>> getProductById(String id);
+
+  Future<void> insertProduct(Product product);
+  Future<void> updateProduct(Product product);
+
+  Future<void> deleteProduct(String productId);
 }
 
+class ProductRepositoryImpl implements ProductsRepository{
 
-class ProductRepositoryMemoryImpl implements ProductRepository{
-  List<Product> _products_list = [];
-  Map<String, Product> _products_by_id_map = {};
+  final Database _db;
+
+  ProductRepositoryImpl(this._db);
 
   @override
-  List<Product> getAll() {
-    return _products_list.getRange(0, _products_list.length).toList(growable: false);
+  Future<List<NutritionalProductSummary>> getAllProductsSummary() async {
+    return await _db.query('products',
+        columns: ['id', 'name', 'fat', 'carbs', 'protein']).then((maps) {
+      if (maps.length > 0) {
+        return maps
+            .map((map) => NutritionalProductSummary.fromProductMap(map))
+            .toList(growable: false);
+      }
+      return [];
+    });
   }
 
   @override
-  Product save(Product p) =>
-      _products_by_id_map.update(p.id, (Product oldValue) => p, ifAbsent: () {
-        _products_list.add(p);
-        return p;
-      });
+  Future<List<NutritionalProductSummary>> getProductsByIds(Set<String> ids) async {
 
-  @override
-  Product getProductById(String id) => _products_by_id_map[id];
+    var inQueryString = ids.map((_) => '?').join(", ");
+    var inArgs = ids.toList(growable: false);
 
-  @override
-  bool remove(String id) {
-    var removed = _products_by_id_map.containsKey(id);
-
-    _products_list.removeWhere((Product p) => p.id==id);
-    _products_by_id_map.removeWhere((String key, Product p) => key==id);
-
-    return removed;
+    return await _db.query('products',
+        columns: ['id', 'name', 'fat', 'carbs', 'protein'],
+        where: 'id in ($inQueryString)',
+        whereArgs: inArgs)
+        .then((maps) {
+      if (maps.length > 0) {
+        return maps
+            .map((map) => NutritionalProductSummary.fromProductMap(map))
+            .toList(growable: false);
+      }
+      return [];
+    });
   }
 
+  @override
+  Future<Optional<Product>> getProductById(String id) async {
+    return await _db.query('products',
+        columns: ['id', 'name', 'fat', 'carbs', 'protein'],
+        where: 'id=?',
+        whereArgs: [id]
+    ).then((maps){
+      if(maps.length==0){
+        return Optional.empty();
+      }else{
+        return Optional.ofNullable(Product.fromMap(maps[0]));
+      }
+    });
+  }
 
+  @override
+  Future<void> insertProduct(Product product) async {
+    return await _db.insert('products', product.toMap());
+  }
+
+  @override
+  Future<void> updateProduct(Product product) async {
+    return await _db.update('products',
+        product.toMap(),
+        where: 'id=?',
+        whereArgs: [product.id]
+    );
+  }
+
+  @override
+  Future<void> deleteProduct(String productId) async {
+    return await _db.delete('products',
+        where: 'id = ?', whereArgs: [productId]);
+  }
 }

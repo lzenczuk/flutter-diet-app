@@ -1,60 +1,38 @@
-
-import 'package:uuid/uuid.dart';
-
-abstract class Ingredient {
-  double _amount;
-
-  Ingredient(this._amount);
-
-  double get amount => _amount;
-
-  set amount(double value) {
-    _amount = value;
-  }
-
-  Ingredient copy();
-}
-
-class ProductIngredient extends Ingredient {
-  final String _productId;
-
-  ProductIngredient(this._productId, double amount) : super(amount);
-
-  String get productId => _productId;
-
-  @override
-  Ingredient copy() {
-    return ProductIngredient(_productId, amount);
-  }
-}
-
-var productUuid = new Uuid();
+import 'ingredient.dart';
 
 class Recipe {
-  String _id;
+  String id;
   String name;
-  List<Ingredient> _ingredients = List();
+  double fat;
+  double carbs;
+  double protein;
 
-  Recipe(this.name){
-    this._id=productUuid.v4();
+  List<Ingredient> ingredients = List();
+
+  Recipe();
+
+  Recipe.fromMap(Map<String, dynamic> map) {
+    this.id=map['id'];
+    this.name=map['name'];
+    this.fat=map['fat'];
+    this.carbs=map['carbs'];
+    this.protein=map['protein'];
   }
 
-  Recipe.from(Recipe recipe){
-    this._id = recipe.id;
-    this.name = recipe.name;
-    recipe.ingredients.forEach((ingredient) => this._ingredients.add(ingredient));
+  Map<String, dynamic> toMap(){
+    return {
+      'id': id,
+      'name': name,
+      'fat': fat,
+      'carbs': carbs,
+      'protein': protein
+    };
   }
 
-  Recipe.create(this.name, List<Ingredient> ingredients){
-    this._id=productUuid.v4();
-    ingredients.forEach((ingredient) => this._ingredients.add(ingredient));
+  @override
+  String toString() {
+    return 'Recipe{id: $id, name: $name, fat: $fat, carbs: $carbs, protein: $protein, ingredients: $ingredients}';
   }
 
-  String get id => _id;
 
-  List<Ingredient> get ingredients => _ingredients.map((i) => i.copy()).toList(growable: false);
-
-  void addIngredient(Ingredient ingredient){
-    _ingredients.add(ingredient);
-  }
 }

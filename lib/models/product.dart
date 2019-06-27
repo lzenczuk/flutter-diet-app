@@ -1,33 +1,32 @@
-import 'package:uuid/uuid.dart';
-
-import 'nutrition.dart';
-
-var productUuid = new Uuid();
-
-class Product implements HasNutrition{
+class Product {
   String id;
   String name;
   double fat;
   double carbs;
   double protein;
 
+
   Product(){
-    this.id=productUuid.v4();
+    fat = 0.0;
+    carbs = 0.0;
+    protein = 0.0;
   }
 
-  Product.basic(this.name, this.fat);
-
-  Product.create(this.name, this.fat, this.carbs, this.protein){
-    this.id=productUuid.v4();
+  Product.fromMap(Map<String, dynamic> map) {
+    this.id=map['id'];
+    this.name=map['name'];
+    this.fat=map['fat'];
+    this.carbs=map['carbs'];
+    this.protein=map['protein'];
   }
 
-  @override
-  String toString() {
-    return 'Product{id: $id, name: $name, fat: $fat, carbohydrates: $carbs, protein: $protein}';
+  Map<String, dynamic> toMap(){
+    return {
+      'id': id,
+      'name': name,
+      'fat': fat,
+      'carbs': carbs,
+      'protein': protein
+    };
   }
-
-  @override
-  Nutrition get nutrition => Nutrition(fat, protein, carbs);
-
-
 }

@@ -1,5 +1,5 @@
-import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/nutrition.dart';
+import 'package:diet_app/services/repositories.dart';
+import 'package:diet_app/models/product.dart';
 import 'package:flutter/material.dart';
 
 class ProductView extends StatefulWidget {
@@ -17,7 +17,7 @@ class _ProductViewState extends State<ProductView> {
     String _productId = ModalRoute.of(context).settings.arguments;
 
     if (_productId != null) {
-      RepositoriesProvider.of(context).nutritionalProductsService.getProductById(_productId).then((opProduct){
+      ServicesProvider.of(context).recipesAndProductsService.getProductById(_productId).then((opProduct){
         if(opProduct.isPresent){
           setState(() {
               _product = opProduct.value;

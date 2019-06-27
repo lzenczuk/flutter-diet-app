@@ -1,6 +1,5 @@
-import 'package:diet_app/data/repositories.dart';
-import 'package:diet_app/models/nutrition.dart';
-import 'package:diet_app/widgets/main_drawer.dart';
+import 'package:diet_app/services/repositories.dart';
+import 'package:diet_app/models/recipe.dart';
 import 'package:diet_app/widgets/products/product_title.dart';
 import 'package:flutter/material.dart';
 
@@ -27,9 +26,9 @@ class _RecipeViewPageState extends State<RecipeViewPage> {
         _loaded = true;
       });
     }else{
-      RepositoriesProvider
+      ServicesProvider
           .of(context)
-          .nutritionalProductsService.getRecipeById(recipeId).then((opRecipe){
+          .recipesAndProductsService.getRecipeById(recipeId).then((opRecipe){
             setState(() {
               _loaded = true;
               opRecipe.ifPresent((recipe) => _recipe=recipe);
