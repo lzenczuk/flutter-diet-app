@@ -11,9 +11,6 @@ class NutritionalProductsRepository {
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'demo.db');
 
-    // Delete the database
-    await deleteDatabase(path);
-
     // open the database
     _db = await openDatabase(path,
         version: 1,
