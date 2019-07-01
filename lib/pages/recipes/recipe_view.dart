@@ -2,7 +2,6 @@ import 'package:diet_app/models/ingredient.dart';
 import 'package:diet_app/models/nutrition.dart';
 import 'package:diet_app/services/repositories.dart';
 import 'package:diet_app/models/recipe.dart';
-import 'package:diet_app/widgets/products/product_title.dart';
 import 'package:flutter/material.dart';
 
 class RecipeViewPage extends StatefulWidget {
@@ -54,48 +53,31 @@ class _RecipeViewPageState extends State<RecipeViewPage> {
 
       body = Column(
         children: <Widget>[
-          Text(
-            _recipe.name,
-            style: Theme.of(context).textTheme.title,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              _recipe.name,
+              style: Theme.of(context).textTheme.title.apply(fontSizeDelta: 5),
+              textAlign: TextAlign.left,
+            ),
           ),
           Divider(),
-          Table(
-            //border: TableBorder.all(),
-            columnWidths: {
-              0: IntrinsicColumnWidth(),
-              1: FlexColumnWidth(1.0),
-            },
-            children: [
-              TableRow(children: [
-                Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Align(
-                        alignment: Alignment.centerRight, child: Text('Fat'))),
-                Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(_recipe.fat.toString()),
-                )
-              ]),
-              TableRow(children: [
-                Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text('Carbohydrate'))),
-                Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(_recipe.carbs.toString()))
-              ]),
-              TableRow(children: [
-                Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Align(
-                      alignment: Alignment.centerRight, child: Text('Protein')),
-                ),
-                Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(_recipe.protein.toString()))
-              ])
+          Row(
+            children: <Widget>[
+              Expanded(
+                  child: NutritionEntry(name: 'Fat', value: _recipe.fat),
+                  flex: 1),
+              Expanded(
+                  child: NutritionEntry(name: 'Carbs', value: _recipe.carbs),
+                  flex: 1),
+              Expanded(
+                  child:
+                      NutritionEntry(name: 'Protein', value: _recipe.protein),
+                  flex: 1),
+              Expanded(
+                  child: NutritionEntry(
+                      name: 'Calories', value: 500, unit: 'kcal', precision: 0),
+                  flex: 1),
             ],
           ),
           Divider(),
@@ -115,7 +97,11 @@ class _RecipeViewPageState extends State<RecipeViewPage> {
       );
     }
 
-    return Scaffold(appBar: buildAppBar(context), body: Center(child: body));
+    return Scaffold(
+        appBar: buildAppBar(context),
+        body: Center(
+            child: Padding(
+                padding: EdgeInsets.only(left: 4.0, right: 4.0), child: body)));
   }
 
   AppBar buildAppBar(BuildContext context) {
@@ -180,55 +166,58 @@ class IngredientView extends StatelessWidget {
     return Column(
       children: <Widget>[
         // ------------- Title line
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                ingredient.nutritionalProductSummary.name,
-                style: textTheme.subhead,
+        Padding(
+          padding: EdgeInsets.only(bottom: 4.0),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  ingredient.nutritionalProductSummary.name,
+                  style: textTheme.subhead,
+                ),
+                flex: 3,
               ),
-              flex: 3,
-            ),
-            Flexible(
-              child: Text(ingredient.amount.toStringAsFixed(2)),
-              flex: 1,
-            )
-          ],
+              Flexible(
+                child: Text(
+                  ingredient.amount.toStringAsFixed(2) + 'g',
+                  textAlign: TextAlign.right,
+                  style: textTheme.subhead.apply(fontWeightDelta: 3),
+                ),
+                flex: 1,
+              )
+            ],
+          ),
         ),
         // ------------- Nutrition line
         Row(
           children: <Widget>[
             Flexible(
-              child: Row(
-                children: <Widget>[
-                  Padding(
-                      padding: EdgeInsets.only(right: 4), child: Text("Fat")),
-                  Text(ingredient.nutritionalProductSummary.nutrition.fat
-                      .toStringAsFixed(2)),
-                ],
+              child: SmallNutritionEntry(
+                name: 'Fat',
+                value: ingredient.nutritionalProductSummary.nutrition.fat,
               ),
               flex: 1,
             ),
             Flexible(
-              child: Row(
-                children: <Widget>[
-                  Padding(
-                      padding: EdgeInsets.only(right: 4), child: Text("Carbs")),
-                  Text(ingredient.nutritionalProductSummary.nutrition.carbs
-                      .toStringAsFixed(2)),
-                ],
+              child: SmallNutritionEntry(
+                name: 'Carbs',
+                value: ingredient.nutritionalProductSummary.nutrition.carbs,
               ),
               flex: 1,
             ),
             Flexible(
-              child: Row(
-                children: <Widget>[
-                  Padding(
-                      padding: EdgeInsets.only(right: 4),
-                      child: Text("Protein")),
-                  Text(ingredient.nutritionalProductSummary.nutrition.protein
-                      .toStringAsFixed(2)),
-                ],
+              child: SmallNutritionEntry(
+                name: 'Protein',
+                value: ingredient.nutritionalProductSummary.nutrition.protein,
+              ),
+              flex: 1,
+            ),
+            Flexible(
+              child: SmallNutritionEntry(
+                name: 'Cal',
+                value: 200,
+                precision: 0,
+                unit: 'kcal',
               ),
               flex: 1,
             ),
@@ -256,6 +245,12 @@ class IngredientView extends StatelessWidget {
                       PercentageBar(percentage: nutritionPercentage.protein)),
               flex: 1,
             ),
+            Flexible(
+              child: Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: PercentageBar(percentage: 99)),
+              flex: 1,
+            ),
           ],
         ),
         Divider(),
@@ -264,56 +259,141 @@ class IngredientView extends StatelessWidget {
   }
 }
 
-class PercentageBar extends StatelessWidget {
-  final double percentage;
+class NutritionEntry extends StatelessWidget {
+  final String name;
+  final double value;
+  final int precision;
+  final String unit;
 
-  const PercentageBar({Key key, this.percentage}) : super(key: key);
+  const NutritionEntry(
+      {Key key, this.name, this.value, this.precision = 2, this.unit = 'g'})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+            padding: EdgeInsets.only(right: 4),
+            child: Text(
+              name,
+              style: Theme.of(context).textTheme.caption.apply(fontSizeDelta: 5.0),
+            )),
+        Text(
+          value.toStringAsFixed(precision) + unit,
+          style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 3),
+        ),
+      ],
+    );
+  }
+}
 
+class SmallNutritionEntry extends StatelessWidget {
+  final String name;
+  final double value;
+  final int precision;
+  final String unit;
+
+  const SmallNutritionEntry(
+      {Key key, this.name, this.value, this.precision = 2, this.unit = 'g'})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Padding(
+            padding: EdgeInsets.only(right: 4),
+            child: Text(
+              name,
+              style: Theme.of(context).textTheme.caption,
+            )),
+        Text(
+          value.toStringAsFixed(precision) + unit,
+          style: Theme.of(context).textTheme.caption.apply(fontWeightDelta: 3),
+        ),
+      ],
+    );
+  }
+}
+
+class PercentageBar extends StatelessWidget {
+  final double percentage;
+  final double height;
+  final double radius;
+
+  const PercentageBar(
+      {Key key, this.percentage, this.height = 8.0, this.radius = 4.0})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     Color barColor = Colors.green;
-    if(percentage>20){
+    if (percentage > 20) {
       barColor = Colors.lightGreen;
     }
-    if(percentage>40){
+    if (percentage > 40) {
       barColor = Colors.yellow;
     }
-    if(percentage>60){
+    if (percentage > 60) {
       barColor = Colors.orange;
     }
-    if(percentage>80){
+    if (percentage > 80) {
       barColor = Colors.red;
     }
 
-    return Row(
+    int barLengthAsPercentage;
+    if (percentage == 0) {
+      barLengthAsPercentage = 0;
+    } else if (percentage < 1) {
+      barLengthAsPercentage = 1;
+    } else if (percentage > 100) {
+      barLengthAsPercentage = 100;
+    } else {
+      barLengthAsPercentage = percentage.ceil();
+    }
+
+    if (barLengthAsPercentage != 0 && barLengthAsPercentage < height) {
+      barLengthAsPercentage = height.ceil();
+    }
+
+    String percentageString;
+    if (percentage < 1) {
+      percentageString = '<1%';
+    } else if (percentage > 100) {
+      percentageString = '100%';
+    } else {
+      percentageString = percentage.toStringAsFixed(0) + '%';
+    }
+
+    return Stack(
       children: <Widget>[
-        Expanded(
-          child: Text(percentage.toStringAsFixed(0) + '%'),
-          flex: 1,
+        Container(
+          height: height,
+          decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.all(Radius.circular(radius))),
         ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                      color: barColor,
-                      borderRadius: BorderRadius.all(Radius.circular(2))),
-                ),
-                flex: percentage.ceil(),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                height: height,
+                decoration: BoxDecoration(
+                    color: barColor,
+                    borderRadius: BorderRadius.all(Radius.circular(radius))),
               ),
-              Expanded(
-                child: Container(
-                  height: 8,
-                ),
-                flex: 100 - percentage.ceil(),
-              )
-            ],
-          ),
-          flex: 3,
-        )
+              flex: barLengthAsPercentage,
+            ),
+            Expanded(
+              child: Container(
+                height: height,
+              ),
+              flex: 100 - barLengthAsPercentage,
+            )
+          ],
+        ),
       ],
     );
   }
